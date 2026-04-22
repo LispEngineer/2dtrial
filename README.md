@@ -43,3 +43,41 @@ To load the game:
     * This adds the current directory to the ASDF / QuickLisp search path
   * `(ql:quickload :2dtrial)`
   * `(2dtrial:launch)`
+
+
+# Miscellaneous
+
+## Alive VS Code Notes
+
+Add this to `settings.json` for proper DSS:
+```json
+    "alive.lsp.startCommand": [
+        "sbcl",
+        "--dynamic-space-size", "5Gb",
+        "--eval",
+        "(ql:quickload '(:bordeaux-threads :usocket :cl-json :flexi-streams))",
+        "--eval",
+        "(require :asdf)",
+        "--eval",
+        "(asdf:load-system :alive-lsp)",
+        "--eval",
+        "(alive/server:start)"
+    ]
+```
+
+Then run this command for each working directory:
+* `(push "/home/dfields/src/cl/2dtrial/" asdf:*central-registry*)`
+
+Add this for nicer rainbow parens:
+```json
+    "workbench.colorCustomizations": {
+        "editor.background": "#000000",
+        // Set up better and six rainbow parens
+        "editorBracketHighlight.foreground1": "#FF0000",
+        "editorBracketHighlight.foreground2": "#FF7F00",
+        "editorBracketHighlight.foreground3": "#FFFF00",
+        "editorBracketHighlight.foreground4": "#00FF00",
+        "editorBracketHighlight.foreground5": "#007FFF",
+        "editorBracketHighlight.foreground6": "#8B00FF"
+    },
+```
