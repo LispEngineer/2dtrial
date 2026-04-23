@@ -31,6 +31,11 @@
   ;; This applies any launch arguments to Trial's internal initialization, targeting our window.
   (apply #'trial:launch 'main args))
 
+;;; =========================================
+;;; Window handling
+;;; =========================================
+
+
 
 ;;; ==========================================
 ;;; SPRITE ENTITY SETUP
@@ -149,6 +154,8 @@
 ;;; ==========================================
 
 ;; This method is automatically called when Trial has initialized the window and needs to build the game scene.
+;; Events are passed to the scene, which propagates it to all the entities within it.
+;; So, this controls the order of what happens.
 (defmethod setup-scene ((main main) scene)
   
   ;; 1. SET UP THE CAMERA
@@ -177,3 +184,8 @@
   ;; This tells Trial's backend to gather all visible entities,
   ;; apply the active camera's matrix, and execute OpenGL drawing calls.
   (enter (make-instance 'render-pass) scene))
+
+
+;; Debugging:
+;; Ask CLOS to list all direct subclasses of trial:event
+;; (c2mop:class-direct-subclasses (find-class 'trial:event))

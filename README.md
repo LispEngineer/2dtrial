@@ -45,6 +45,14 @@ To load the game:
   * `(2dtrial:launch)`
 
 
+# TO DO
+
+* Make a function that runs whenever the window or camera changes and stores
+  the size and location of the visible screen in a variable.
+* Use a tile map to show a background
+* Display a UI (text information) on top of the sprite & tile map
+
+
 # Miscellaneous
 
 ## Alive VS Code Notes
