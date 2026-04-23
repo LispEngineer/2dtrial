@@ -80,20 +80,27 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun visible-area (camera)
-  "Prints the visible bounds of the 2D camera."
-  (let* ((loc (trial:location camera))
+(defun current-camera ()
+  "Returns the active camera for the current scene."
+  (trial:camera (trial:scene trial:+main+)))
+
+(defun get-visible-area ()
+  "Returns the visible bounds of the 2D camera."
+  (let* ((camera (current-camera))
+         (loc (trial:location camera))
          (x (vx loc))
          (y (vy loc))
 
          ;; Get the current screen/window dimensions from the active context
          (w (trial:width trial:*context*))
          (h (trial:height trial:*context*)))
-   (format t "x: ~a, y: ~a, w: ~a, h: ~a" x y w h)))
+    (list x y (+ x w) (+ y h))))
 
-(defun current-camera ()
-  "Returns the active camera for the current scene."
-  (trial:camera (trial:scene trial:+main+)))
+(defun print-visible-area ()
+  "Prints the visible bounds of the 2D camera."
+  (destructuring-bind (x y w h) (get-visible-area)
+    (format t "x: ~a, y: ~a, w: ~a, h: ~a" x y w h)))
+
 
 ;;; ==========================================
 ;;; MOVEMENT AND BOUNDARY COLLISION
@@ -106,25 +113,33 @@
 ;; The `tick` handler fires every single frame. 
 ;; `dt` is the "delta time" (fraction of a second) since the last frame.
 (define-handler (cat-sprite tick) (dt)
-  (let ((pos (location cat-sprite))       ; The current 3D position vector
-        (vel (velocity cat-sprite))       ; The current 2D movement vector
-        (speed 100.0))                    ; Movement speed in pixels per second
+  (let* ((pos (location cat-sprite))       ; The current 3D position vector
+         (vel (velocity cat-sprite))       ; The current 2D movement vector
+         (speed 100.0)                     ; Movement speed in pixels per second
+         (cam-info (get-visible-area))
+         (cam-x (first cam-info)) ;; Should just use destructuring-bind
+         (cam-y (second cam-info))
+         (cam-w (third cam-info))
+         (cam-h (fourth cam-info))
+         (half-size (/ sprite-size 2))
+         (cat-min-x (+ cam-x half-size))
+         (cat-max-x (- cam-w half-size))
+         (cat-min-y (+ cam-y half-size))
+         (cat-max-y (- cam-h half-size)))
 
     ;; Update position: Add velocity scaled by speed and `dt`. 
     ;; Scaling by `dt` guarantees the sprite moves at the same speed regardless of the monitor's refresh rate.
     (incf (vx pos) (* (vx vel) speed (float dt 0f0)))
     (incf (vy pos) (* (vy vel) speed (float dt 0f0)))
 
-    ;; Clamp the position naively.
-    ;; TODO: Clamp the position so that the entire sprite is always visible on the visible part
-    ;; of the game window.
-    (setf (vx pos) (max 0 (min starting-width (vx pos))))
-    (setf (vy pos) (max 0 (min starting-height (vy pos))))
+    ;; Clamp the position to the visible area.
+    (setf (vx pos) (max cat-min-x (min cat-max-x (vx pos))))
+    (setf (vy pos) (max cat-min-y (min cat-max-y (vy pos))))
     ; Print some debugging
-    (if (not (and (equal (vx pos) oldx) (equal (vy pos) oldy)))
+    (unless (and (equal (vx pos) oldx) (equal (vy pos) oldy))
       (progn
         (print pos)
-        (visible-area (current-camera))))
+        (print-visible-area)))
     (setf oldx (vx pos))
     (setf oldy (vy pos))))
 
