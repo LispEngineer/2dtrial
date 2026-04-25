@@ -5,4 +5,5 @@
   ;; (highly recommended for Linux/KDE), and the PNG loader for our cat sprite.
   :depends-on (:trial
                :trial-glfw  
-               :trial-png)) 
+               :trial-png
+               :trial-alloy)) 
