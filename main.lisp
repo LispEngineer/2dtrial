@@ -40,6 +40,11 @@
 ;;; UI
 ;;; =========================================
 
+;; Following docs: https://shirakumo.org/docs/trial/alloy.html
+
+(define-shader-pass ui (org.shirakumo.fraf.trial.alloy:base-ui)
+  ())
+
 ;;; ==========================================
 ;;; SPRITE ENTITY SETUP
 ;;; ==========================================
@@ -186,7 +191,14 @@
   ;; Finally, we tell the engine how to draw everything by entering a standard `render-pass`.
   ;; This tells Trial's backend to gather all visible entities,
   ;; apply the active camera's matrix, and execute OpenGL drawing calls.
-  (enter (make-instance 'render-pass) scene))
+  ; (enter (make-instance 'render-pass) scene)
+
+  (let ((game (make-instance 'render-pass))
+        (ui (make-instance 'ui))
+        (combine (make-instance 'blend-pass)))
+    (connect (port game 'color) (port combine 'a-pass) scene)
+    (connect (port ui 'color) (port combine 'b-pass) scene))
+)
 
 
 ;; Debugging:
