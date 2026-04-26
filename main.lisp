@@ -36,6 +36,42 @@
 ;;; =========================================
 
 
+;;; =========================================
+;;; UI
+;;; =========================================
+
+;; --- 1. The Right Panel ---
+;; Inherits from vertical-linear-layout to stack the text rows, 
+;; and from renderable so we can draw a background/border.
+(defclass right-panel (alloy:vertical-linear-layout alloy:renderable) ())
+
+(presentations:define-realization (alloy:ui right-panel)
+  ;; Draw the black background
+  ((:background simple:rectangle)
+   (alloy:margins)
+   :pattern (chroma:color 0 0 0 1.0))
+  
+  ;; Draw the thin white border strictly on the left edge
+  ;; (alloy:ph 1) means 100% of the Parent's Height
+  ((:left-border simple:line-strip)
+   (list (alloy:point 0 0) (alloy:point 0 (alloy:ph 1))) 
+   :pattern (chroma:color 1 1 1 1.0)
+   :line-width (alloy:un 2)))
+
+;; --- 2. The Colored Labels ---
+;; A custom label that accepts a color initialization argument
+(defclass colored-label (alloy:label)
+  ((text-color :initarg :text-color :accessor text-color)))
+
+(presentations:define-realization (alloy:ui colored-label)
+  ((:label simple:text)
+   (alloy:margins)
+   alloy:text
+   :pattern (text-color alloy:renderable) ; Pull the color from our class
+   :halign :start
+   :valign :middle))
+
+
 
 ;;; ==========================================
 ;;; SPRITE ENTITY SETUP
@@ -157,7 +193,7 @@
 ;; Events are passed to the scene, which propagates it to all the entities within it.
 ;; So, this controls the order of what happens.
 (defmethod setup-scene ((main main) scene)
-  
+
   ;; 1. SET UP THE CAMERA
   ;; We instantiate a `2d-camera` and `enter` it into the scene.
   ;; The 2d-camera automatically utilizes an orthographic projection matrix instead of a perspective matrix.
