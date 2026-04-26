@@ -48,9 +48,20 @@
 
 (defclass hud (org.shirakumo.fraf.trial.alloy:panel) ())
 
+(defclass large-label (alloy:label) ())
+
+(presentations:define-realization (alloy:ui large-label)
+  ((:label simple:text)
+   (alloy:margins)
+   alloy:text
+   :size (alloy:un 40) ; Set font size here (40 units)
+   :halign :start
+   :valign :middle))
+
 (defmethod initialize-instance :after ((hud hud) &key)
-  (let ((layout (make-instance 'org.shirakumo.alloy.layouts.constraint:layout)))
-    (alloy:enter "Hello!" layout :constraints `((:left 10) (:top 10) (:size 500 30)))
+  (let* ((layout (make-instance 'org.shirakumo.alloy.layouts.constraint:layout))
+         (label (alloy:represent "Hello!" 'large-label)))
+    (alloy:enter label layout :constraints `((:left 10) (:top 10) (:size 500 100)))
     (alloy:finish-structure hud layout NIL)))
 
 
@@ -201,8 +212,6 @@
   (let ((game (make-instance 'render-pass))
         (ui (make-instance 'ui))
         (combine (make-instance 'blend-pass)))
-    (enter game scene)
-    (enter ui scene)
     (enter combine scene)
     (connect (port game 'color) (port combine 'a-pass) scene)
     (connect (port ui 'color) (port combine 'b-pass) scene)
