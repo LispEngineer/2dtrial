@@ -40,37 +40,6 @@
 ;;; UI
 ;;; =========================================
 
-;; --- 1. The Right Panel ---
-;; Inherits from vertical-linear-layout to stack the text rows, 
-;; and from renderable so we can draw a background/border.
-(defclass right-panel (alloy:vertical-linear-layout alloy:renderable) ())
-
-(presentations:define-realization (alloy:ui right-panel)
-  ;; Draw the black background
-  ((:background simple:rectangle)
-   (alloy:margins)
-   :pattern (chroma:color 0 0 0 1.0))
-  
-  ;; Draw the thin white border strictly on the left edge
-  ;; (alloy:ph 1) means 100% of the Parent's Height
-  ((:left-border simple:line-strip)
-   (list (alloy:point 0 0) (alloy:point 0 (alloy:ph 1))) 
-   :pattern (chroma:color 1 1 1 1.0)
-   :line-width (alloy:un 2)))
-
-;; --- 2. The Colored Labels ---
-;; A custom label that accepts a color initialization argument
-(defclass colored-label (alloy:label)
-  ((text-color :initarg :text-color :accessor text-color)))
-
-(presentations:define-realization (alloy:ui colored-label)
-  ((:label simple:text)
-   (alloy:margins)
-   alloy:text
-   :pattern (text-color alloy:renderable) ; Pull the color from our class
-   :halign :start
-   :valign :middle))
-
 
 
 ;;; ==========================================
@@ -156,7 +125,7 @@
 (define-handler (cat-sprite tick) (dt)
   (let* ((pos (location cat-sprite))       ; The current 3D position vector
          (vel (velocity cat-sprite))       ; The current 2D movement vector
-         (speed 100.0)                     ; Movement speed in pixels per second
+         (cat-speed 100.0)                     ; Movement speed in pixels per second
          (cam-info (get-visible-area))
          (cam-x (first cam-info)) ;; Should just use destructuring-bind
          (cam-y (second cam-info))
@@ -170,8 +139,8 @@
 
     ;; Update position: Add velocity scaled by speed and `dt`. 
     ;; Scaling by `dt` guarantees the sprite moves at the same speed regardless of the monitor's refresh rate.
-    (incf (vx pos) (* (vx vel) speed (float dt 0f0)))
-    (incf (vy pos) (* (vy vel) speed (float dt 0f0)))
+    (incf (vx pos) (* (vx vel) cat-speed (float dt 0f0)))
+    (incf (vy pos) (* (vy vel) cat-speed (float dt 0f0)))
 
     ;; Clamp the position to the visible area.
     (setf (vx pos) (max cat-min-x (min cat-max-x (vx pos))))
