@@ -40,15 +40,6 @@
 ;;; UI
 ;;; =========================================
 
-(defclass info-panel (trial-alloy:panel) ())
-
-(defmethod initialize-instance :after ((panel info-panel) &key)
-  (let* ((layout (make-instance 'alloy:fixed-layout))
-         (focus (make-instance 'alloy:focus-list))
-         (label (alloy:represent "Hello, world!" 'alloy:label)))
-    (alloy:enter label layout :extent (alloy:extent (- 1920 200) (- 1080 60) 200 60))
-    (alloy:finish-structure panel layout focus)))
-
 ;;; ==========================================
 ;;; SPRITE ENTITY SETUP
 ;;; ==========================================
@@ -195,11 +186,7 @@
   ;; Finally, we tell the engine how to draw everything by entering a standard `render-pass`.
   ;; This tells Trial's backend to gather all visible entities,
   ;; apply the active camera's matrix, and execute OpenGL drawing calls.
-  (enter (make-instance 'render-pass) scene)
-  ;; We also add a `ui-pass` to render our Alloy UI on top.
-  (enter (make-instance 'trial-alloy:base-ui) scene)
-  ;; And show our info panel.
-  (trial-alloy:show-panel 'info-panel))
+  (enter (make-instance 'render-pass) scene))
 
 
 ;; Debugging:
