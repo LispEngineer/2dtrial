@@ -46,7 +46,10 @@
   ())
 
 
-(defclass hud (org.shirakumo.fraf.trial.alloy:panel) ())
+(defclass hud (org.shirakumo.fraf.trial.alloy:panel listener)
+  ((x-offset :initform 10.0f0 :accessor x-offset)
+   (dx :initform 0.0f0 :accessor dx)
+   (label :accessor label)))
 
 (defclass large-label (alloy:label) ())
 
@@ -59,10 +62,29 @@
    :valign :middle))
 
 (defmethod initialize-instance :after ((hud hud) &key)
-  (let* ((layout (make-instance 'org.shirakumo.alloy.layouts.constraint:layout))
+  (let* ((layout (make-instance 'alloy:fixed-layout))
          (label (alloy:represent "Hello!" 'large-label)))
-    (alloy:enter label layout :constraints `((:left 10) (:top 10) (:size 500 100)))
+    (setf (label hud) label)
+    (alloy:enter label layout :extent (alloy:extent (x-offset hud) 610 500 100))
     (alloy:finish-structure hud layout NIL)))
+
+(define-handler (hud key-press) (key)
+  (case key
+    (:l (setf (dx hud) -60.0f0))
+    (:h (setf (dx hud)  60.0f0))))
+
+(define-handler (hud key-release) (key)
+  (case key
+    (:l (setf (dx hud) 0.0f0))
+    (:h (setf (dx hud) 0.0f0))))
+
+(define-handler (hud tick) (dt)
+  (when (/= 0 (dx hud))
+    (incf (x-offset hud) (* (dx hud) (float dt 0f0)))
+    (print "Moving")
+    (pprint hud))
+    ;; TODO: Figure out how to actually update the position of the label
+)
 
 
 
@@ -215,8 +237,9 @@
     (enter combine scene)
     (connect (port game 'color) (port combine 'a-pass) scene)
     (connect (port ui 'color) (port combine 'b-pass) scene)
-    ;; Show our hud panel.
+    ;; Show our hud panel and register it as a listener so it moves.
     (org.shirakumo.fraf.trial.alloy:show-panel 'hud)))
+;    (enter (org.shirakumo.fraf.trial.alloy:show-panel 'hud) scene)))
 
 
 ;; Debugging:
