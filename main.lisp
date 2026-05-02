@@ -49,6 +49,18 @@
 
 (defclass large-label (alloy:label) ())
 
+#|
+; This output doesn't really explain much to me
+(print (macroexpand-1
+'(presentations:define-realization (alloy:ui large-label)
+  ((:label simple:text)
+   (alloy:margins); (... 0 0 0 font-size) ;; a b c d = d shifts things UP; a = shifts things RIGHT
+   alloy:text
+   :size (alloy:un font-size) ; Set font size here (40 units)
+   :halign :start
+   :valign :bottom))))
+|#
+
 (presentations:define-realization (alloy:ui large-label)
   ((:label simple:text)
    (alloy:margins); (... 0 0 0 font-size) ;; a b c d = d shifts things UP; a = shifts things RIGHT
@@ -56,7 +68,6 @@
    :size (alloy:un font-size) ; Set font size here (40 units)
    :halign :start
    :valign :bottom))
-
 
 (defmethod initialize-instance :after ((hud hud) &key)
   (let* ((layout (make-instance 'alloy:vertical-linear-layout :cell-margins (alloy:margins 0)))

@@ -15,6 +15,7 @@ Date began:
 References:
 * [Trial Game Engine](https://shirakumo.org/docs/trial/index.html)
 * [Alive VS Code](https://marketplace.visualstudio.com/items?itemName=rheller.alive)
+* [Making a Game in Lisp](https://reader.tymoon.eu/article/413)
 
 # Instructions
 
