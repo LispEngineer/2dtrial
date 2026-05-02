@@ -70,14 +70,16 @@
    :valign :bottom))
 
 (defmethod initialize-instance :after ((hud hud) &key)
-  (let* ((layout (make-instance 'alloy:vertical-linear-layout :cell-margins (alloy:margins 0)))
+  (let* ((root (make-instance 'alloy:border-layout))
+         (sidebar (make-instance 'alloy:vertical-linear-layout :cell-margins (alloy:margins 0)))
          (label (alloy:represent "Hello!" 'large-label))
          (label3 (alloy:represent "Cruel" 'large-label))
          (label2 (alloy:represent "World!" 'large-label)))
-    (alloy:enter label layout)
-    (alloy:enter label3 layout)
-    (alloy:enter label2 layout)
-    (alloy:finish-structure hud layout NIL)))
+    (alloy:enter label sidebar)
+    (alloy:enter label3 sidebar)
+    (alloy:enter label2 sidebar)
+    (alloy:enter sidebar root :place :east :size (alloy:un 400))
+    (alloy:finish-structure hud root NIL)))
 
 
 ;;; ==========================================
