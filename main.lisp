@@ -45,11 +45,7 @@
 
 (define-shader-pass ui (org.shirakumo.fraf.trial.alloy:base-ui) ())
 
-(defclass hud (org.shirakumo.fraf.trial.alloy:panel listener) 
-  ((x-text :initform "X: 0.0" :accessor x-text)
-   (y-text :initform "Y: 0.0" :accessor y-text)
-   (x-data :accessor x-data)
-   (y-data :accessor y-data)))
+(defclass hud (org.shirakumo.fraf.trial.alloy:panel listener) ())
 
 (defclass large-label (alloy:label) ())
 
@@ -74,28 +70,17 @@
    :valign :bottom))
 
 (defmethod initialize-instance :after ((hud hud) &key)
-  (let* ((root (make-instance 'alloy:border-layout))
+  (let* ((cat (trial:node :cat (trial:scene trial:+main+)))
+         (root (make-instance 'alloy:border-layout))
          (sidebar (make-instance 'alloy:vertical-linear-layout :cell-margins (alloy:margins 0)))
-         (label-x (alloy:represent (slot-value hud 'x-text) 'large-label))
-         (label-y (alloy:represent (slot-value hud 'y-text) 'large-label)))
-    
-    ;; Save data object references so we can refresh them later
-    (setf (x-data hud) (alloy:data label-x))
-    (setf (y-data hud) (alloy:data label-y))
+         ;; Use the correct observable slots from the cat-sprite
+         (label-x (alloy:represent (cat-x-str cat) 'large-label))
+         (label-y (alloy:represent (cat-y-str cat) 'large-label)))
     
     (alloy:enter label-x sidebar)
     (alloy:enter label-y sidebar)
     (alloy:enter sidebar root :place :east :size (alloy:un 400))
     (alloy:finish-structure hud root NIL)))
-
-(define-handler (hud tick) ()
-  (let ((cat (trial:node :cat (trial:scene trial:+main+))))
-    (when cat
-      (let ((pos (trial:location cat)))
-        (setf (x-text hud) (format nil "X: ~,1f" (vx pos)))
-        (setf (y-text hud) (format nil "Y: ~,1f" (vy pos)))
-        (alloy:refresh (x-data hud))
-        (alloy:refresh (y-data hud))))))
 
 
 ;;; ==========================================
@@ -111,14 +96,22 @@
 ;; - textured-entity: Allows the entity to be painted with an image.
 ;; - transformed-entity: Gives the entity position, scale, and rotation coordinates.
 ;; - listener: Hooks the entity into Trial's event system to listen for keyboard inputs.
-(define-shader-entity cat-sprite (vertex-entity textured-entity transformed-entity listener)
+(define-shader-entity cat-sprite (vertex-entity textured-entity transformed-entity listener alloy:observable-object)
   ;; (// 'trial 'cat) pulls the built-in cat.png asset natively shipped with the engine.
   ((texture :initform (// 'trial 'cat))
    ;; We use a 1x1 flat geometric square (`unit-square`) to stretch the texture over.
    (vertex-array :initform (// 'trial 'unit-square))
    ;; A custom slot to keep track of the cat's movement vector.
    ;; We initialize it to a 2D vector of (0.0, 0.0)
-   (velocity :initform (vec2 0.0 0.0) :accessor velocity)))
+   (velocity :initform (vec2 0.0 0.0) :accessor velocity)
+   (cat-x-str :initform "X: 0.0" :accessor cat-x-str)
+   (cat-y-str :initform "Y: 0.0" :accessor cat-y-str)))
+
+(defmethod (setf cat-x-str) :after (value (sprite cat-sprite))
+  (alloy:notify-observers 'cat-x-str sprite value sprite))
+
+(defmethod (setf cat-y-str) :after (value (sprite cat-sprite))
+  (alloy:notify-observers 'cat-y-str sprite value sprite))
 
 
 ;;; ==========================================
@@ -204,6 +197,9 @@
     ; Print some debugging
     (unless (and (equal (vx pos) oldx) (equal (vy pos) oldy))
       (progn
+        ;; Update observable slots
+        (setf (cat-x-str cat-sprite) (format nil "X: ~,1f" (vx pos)))
+        (setf (cat-y-str cat-sprite) (format nil "Y: ~,1f" (vy pos)))
         (print pos)
         (print-visible-area)))
     (setf oldx (vx pos))
