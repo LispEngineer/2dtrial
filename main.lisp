@@ -64,7 +64,7 @@
          ;; These two labels are on top of each other
          (label2 (alloy:represent "World!" 'large-label)))
     (alloy:enter label layout)
-    (alloy:enter label2 layout :x (alloy:px 400))
+    (alloy:enter label2 layout)
     (alloy:finish-structure hud layout NIL)))
 
 
