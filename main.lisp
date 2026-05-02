@@ -10,6 +10,7 @@
 (defparameter starting-width 1920)
 (defparameter starting-height 1080)
 (defparameter sprite-size 32)
+(defparameter font-size 40)
 
 ;; TODO: FIgure out why the width & height are (seemingly?) ignored,
 ;; and the initial window displayable area is 1536x864.
@@ -42,50 +43,29 @@
 
 ;; Following docs: https://shirakumo.org/docs/trial/alloy.html
 
-(define-shader-pass ui (org.shirakumo.fraf.trial.alloy:base-ui)
-  ())
+(define-shader-pass ui (org.shirakumo.fraf.trial.alloy:base-ui) ())
 
-
-(defclass hud (org.shirakumo.fraf.trial.alloy:panel listener)
-  ((x-offset :initform 10.0f0 :accessor x-offset)
-   (dx :initform 0.0f0 :accessor dx)
-   (label :accessor label)))
+(defclass hud (org.shirakumo.fraf.trial.alloy:panel listener) ())
 
 (defclass large-label (alloy:label) ())
 
 (presentations:define-realization (alloy:ui large-label)
   ((:label simple:text)
-   (alloy:margins)
+   (alloy:margins); (... 0 0 0 font-size) ;; a b c d = d shifts things UP; a = shifts things RIGHT
    alloy:text
-   :size (alloy:un 40) ; Set font size here (40 units)
+   :size (alloy:un font-size) ; Set font size here (40 units)
    :halign :start
-   :valign :middle))
+   :valign :bottom))
+
 
 (defmethod initialize-instance :after ((hud hud) &key)
   (let* ((layout (make-instance 'alloy:fixed-layout))
-         (label (alloy:represent "Hello!" 'large-label)))
-    (setf (label hud) label)
-    (alloy:enter label layout :extent (alloy:extent (x-offset hud) 610 500 100))
+         (label (alloy:represent "Hello!" 'large-label))
+         ;; These two labels are on top of each other
+         (label2 (alloy:represent "World!" 'large-label)))
+    (alloy:enter label layout)
+    (alloy:enter label2 layout :x (alloy:px 400))
     (alloy:finish-structure hud layout NIL)))
-
-(define-handler (hud key-press) (key)
-  (case key
-    (:l (setf (dx hud) -60.0f0))
-    (:h (setf (dx hud)  60.0f0))))
-
-(define-handler (hud key-release) (key)
-  (case key
-    (:l (setf (dx hud) 0.0f0))
-    (:h (setf (dx hud) 0.0f0))))
-
-(define-handler (hud tick) (dt)
-  (when (/= 0 (dx hud))
-    (incf (x-offset hud) (* (dx hud) (float dt 0f0)))
-    (print "Moving")
-    (pprint hud))
-    ;; TODO: Figure out how to actually update the position of the label
-)
-
 
 
 ;;; ==========================================
