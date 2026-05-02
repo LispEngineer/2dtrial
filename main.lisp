@@ -45,7 +45,11 @@
 
 (define-shader-pass ui (org.shirakumo.fraf.trial.alloy:base-ui) ())
 
-(defclass hud (org.shirakumo.fraf.trial.alloy:panel listener) ())
+(defclass hud (org.shirakumo.fraf.trial.alloy:panel listener) 
+  ((x-text :initform "X: 0.0" :accessor x-text)
+   (y-text :initform "Y: 0.0" :accessor y-text)
+   (x-data :accessor x-data)
+   (y-data :accessor y-data)))
 
 (defclass large-label (alloy:label) ())
 
@@ -72,14 +76,26 @@
 (defmethod initialize-instance :after ((hud hud) &key)
   (let* ((root (make-instance 'alloy:border-layout))
          (sidebar (make-instance 'alloy:vertical-linear-layout :cell-margins (alloy:margins 0)))
-         (label (alloy:represent "Hello!" 'large-label))
-         (label3 (alloy:represent "Cruel" 'large-label))
-         (label2 (alloy:represent "World!" 'large-label)))
-    (alloy:enter label sidebar)
-    (alloy:enter label3 sidebar)
-    (alloy:enter label2 sidebar)
+         (label-x (alloy:represent (slot-value hud 'x-text) 'large-label))
+         (label-y (alloy:represent (slot-value hud 'y-text) 'large-label)))
+    
+    ;; Save data object references so we can refresh them later
+    (setf (x-data hud) (alloy:data label-x))
+    (setf (y-data hud) (alloy:data label-y))
+    
+    (alloy:enter label-x sidebar)
+    (alloy:enter label-y sidebar)
     (alloy:enter sidebar root :place :east :size (alloy:un 400))
     (alloy:finish-structure hud root NIL)))
+
+(define-handler (hud tick) ()
+  (let ((cat (trial:node :cat (trial:scene trial:+main+))))
+    (when cat
+      (let ((pos (trial:location cat)))
+        (setf (x-text hud) (format nil "X: ~,1f" (vx pos)))
+        (setf (y-text hud) (format nil "Y: ~,1f" (vy pos)))
+        (alloy:refresh (x-data hud))
+        (alloy:refresh (y-data hud))))))
 
 
 ;;; ==========================================
@@ -220,6 +236,7 @@
   ;; our sprite perfectly renders as a 32x32 pixel image.
   ;; The CENTER of the image is at this location, and it extends 16 pixels in all 4 directions.
   (enter (make-instance 'cat-sprite 
+                        :name :cat
                         :location (vec (/ starting-width 2) (/ starting-height 2) 0.0)
                         :scaling (vec sprite-size sprite-size 1.0))
          scene)
