@@ -10,7 +10,7 @@
 (defparameter starting-width 1920)
 (defparameter starting-height 1080)
 (defparameter sprite-size 32)
-(defparameter font-size 40)
+(defparameter font-size 30)
 
 ;; TODO: FIgure out why the width & height are (seemingly?) ignored,
 ;; and the initial window displayable area is 1536x864.
@@ -59,11 +59,12 @@
 
 
 (defmethod initialize-instance :after ((hud hud) &key)
-  (let* ((layout (make-instance 'alloy:fixed-layout))
+  (let* ((layout (make-instance 'alloy:vertical-linear-layout :cell-margins (alloy:margins 0)))
          (label (alloy:represent "Hello!" 'large-label))
-         ;; These two labels are on top of each other
+         (label3 (alloy:represent "Cruel" 'large-label))
          (label2 (alloy:represent "World!" 'large-label)))
     (alloy:enter label layout)
+    (alloy:enter label3 layout)
     (alloy:enter label2 layout)
     (alloy:finish-structure hud layout NIL)))
 
